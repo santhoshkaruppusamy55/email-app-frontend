@@ -1,0 +1,171 @@
+```html
+     <!DOCTYPE html>
+     <html lang="en">
+     <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Transactional Email App</title>
+       <style>
+         body {
+           font-family: Arial, sans-serif;
+           background-color: #f0f0f0;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           min-height: 100vh;
+           margin: 0;
+         }
+         .container {
+           background-color: white;
+           padding: 20px;
+           border-radius: 8px;
+           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+           width: 100%;
+           max-width: 400px;
+         }
+         h1 {
+           text-align: center;
+           margin-bottom: 20px;
+         }
+         .form-toggle {
+           margin-bottom: 20px;
+         }
+         .form-toggle label {
+           margin-right: 20px;
+         }
+         .form-group {
+           margin-bottom: 15px;
+         }
+         label {
+           display: block;
+           margin-bottom: 5px;
+           font-weight: bold;
+         }
+         input, textarea {
+           width: 100%;
+           padding: 8px;
+           border: 1px solid #ccc;
+           border-radius: 4px;
+           box-sizing: border-box;
+         }
+         textarea {
+           height: 100px;
+           resize: vertical;
+         }
+         button {
+           width: 100%;
+           padding: 10px;
+           background-color: #007bff;
+           color: white;
+           border: none;
+           border-radius: 4px;
+           cursor: pointer;
+         }
+         button:hover {
+           background-color: #0056b3;
+         }
+         #message {
+           margin-top: 15px;
+           text-align: center;
+           color: green;
+         }
+         #message.error {
+           color: red;
+         }
+       </style>
+     </head>
+     <body>
+       <div class="container">
+         <h1>Transactional Email App</h1>
+         <div class="form-toggle">
+           <label>
+             <input type="radio" name="formType" value="immediate" checked onclick="toggleForm()"> Immediate Email
+           </label>
+           <label>
+             <input type="radio" name="formType" value="scheduled" onclick="toggleForm()"> Scheduled Email
+           </label>
+         </div>
+         <form id="emailForm" onsubmit="handleSubmit(event)">
+           <div class="form-group">
+             <label for="to">To</label>
+             <input type="email" id="to" required>
+           </div>
+           <div class="form-group">
+             <label for="subject">Subject</label>
+             <input type="text" id="subject" required>
+           </div>
+           <div class="form-group">
+             <label for="body">Body</label>
+             <textarea id="body" required></textarea>
+           </div>
+           <div class="form-group" id="scheduleFields" style="display: none;">
+             <label for="sendTime">Send Time (YYYY-MM-DD HH:MM)</label>
+             <input type="datetime-local" id="sendTime">
+             <label for="endDate">End Date (YYYY-MM-DD)</label>
+             <input type="date" id="endDate">
+           </div>
+           <button type="submit">Send Email</button>
+         </form>
+         <p id="message"></p>
+       </div>
+
+       <script>
+         const API_BASE_URL = 'https://<your-api-id>.execute-api.<region>.amazonaws.com/prod';
+
+         function toggleForm() {
+           const formType = document.querySelector('input[name="formType"]:checked').value;
+           const scheduleFields = document.getElementById('scheduleFields');
+           const button = document.querySelector('button');
+           if (formType === 'scheduled') {
+             scheduleFields.style.display = 'block';
+             document.getElementById('sendTime').required = true;
+             document.getElementById('endDate').required = true;
+             button.textContent = 'Schedule Email';
+           } else {
+             scheduleFields.style.display = 'none';
+             document.getElementById('sendTime').required = false;
+             document.getElementById('endDate').required = false;
+             button.textContent = 'Send Email';
+           }
+         }
+
+         async function handleSubmit(event) {
+           event.preventDefault();
+           const formType = document.querySelector('input[name="formType"]:checked').value;
+           const to = document.getElementById('to').value;
+           const subject = document.getElementById('subject').value;
+           const body = document.getElementById('body').value;
+           const messageEl = document.getElementById('message');
+
+           messageEl.textContent = '';
+           messageEl.classList.remove('error');
+
+           try {
+             let url, payload;
+             if (formType === 'immediate') {
+               url = `${API_BASE_URL}/send-email`;
+               payload = { to, subject, body };
+             } else {
+               const sendTime = document.getElementById('sendTime').value;
+               const endDate = document.getElementById('endDate').value;
+               url = `${API_BASE_URL}/schedule-email`;
+               payload = { to, subject, body, send_time: sendTime, end_date: endDate };
+             }
+
+             const response = await fetch(url, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(payload),
+             });
+
+             const data = await response.json();
+             messageEl.textContent = data.message || (formType === 'immediate' ? 'Email sent successfully!' : 'Email scheduled successfully!');
+           } catch (error) {
+             messageEl.textContent = 'Error: ' + error.message;
+             messageEl.classList.add('error');
+           }
+         }
+       </script>
+     </body>
+     </html>
+     ```

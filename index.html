@@ -43,7 +43,6 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 10px;
         }
         button:hover {
             background-color: #0056b3;
@@ -53,25 +52,18 @@
 <body>
     <div class="container">
         <h1>Transactional Email Service</h1>
-        <p>Send or schedule emails to multiple recipients using Brevo.</p>
+        <p>Send emails to multiple recipients instantly.</p>
         
         <form id="emailForm">
             <label for="sender">Sender Email:</label>
-            <input type="email" id="sender" required placeholder="sender@example.com">
+            <input type="email" id="sender" required placeholder="sender@santhoshkaruppusamy.site">
             <label for="receivers">Recipient Emails (comma-separated):</label>
             <input type="text" id="receivers" required placeholder="receiver1@example.com,receiver2@example.com">
             <label for="subject">Subject:</label>
             <input type="text" id="subject" required placeholder="Test Subject">
             <label for="content">Content:</label>
             <textarea id="content" required placeholder="Test Content"></textarea>
-            <label for="sendTime">Send Time (IST, for scheduling):</label>
-            <input type="time" id="sendTime">
-            <label for="startDate">Start Date (for scheduling):</label>
-            <input type="date" id="startDate" value="2025-04-23">
-            <label for="endDate">End Date (for scheduling):</label>
-            <input type="date" id="endDate" value="2025-04-25">
             <button type="submit" id="sendNow">Send Email Now</button>
-            <button type="submit" id="schedule">Schedule Email</button>
         </form>
     </div>
 
@@ -92,33 +84,13 @@
                 body: content
             };
 
-            if (e.submitter.id === 'sendNow') {
-                const response = await fetch(`${apiBaseUrl}/send-email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                alert(result.message || result.error);
-            } else if (e.submitter.id === 'schedule') {
-                const sendTime = document.getElementById('sendTime').value;
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                if (!sendTime || !startDate || !endDate) {
-                    alert('Please provide send time, start date, and end date for scheduling');
-                    return;
-                }
-                payload.send_time = sendTime;
-                payload.start_date = startDate;
-                payload.end_date = endDate;
-                const response = await fetch(`${apiBaseUrl}/schedule-email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                alert(result.message || result.error);
-            }
+            const response = await fetch(`${apiBaseUrl}/send-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
         });
     </script>
 </body>

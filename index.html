@@ -4,93 +4,299 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transactional Email Service</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f3f4f6;
+            --text: #1e293b;
+            --light-text: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
+        
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
         }
-        h1 {
-            color: #333;
+        
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
         }
-        form {
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
             margin-bottom: 20px;
         }
+        
+        .full-width {
+            grid-column: span 2;
+        }
+        
         label {
             display: block;
-            margin: 10px 0 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
         }
+        
         input, textarea {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
         }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
         button {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s;
         }
+        
         button:hover {
-            background-color: #0056b3;
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid var(--success);
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-left: 4px solid var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .full-width {
+                grid-column: span 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Transactional Email Service</h1>
-        <p>Send emails to multiple recipients instantly.</p>
+        <div class="header">
+            <h1>Email Service</h1>
+            <p>Send professional emails to multiple recipients with ease</p>
+        </div>
         
-        <form id="emailForm">
-            <label for="sender">Sender Email:</label>
-            <input type="email" id="sender" required placeholder="sender@santhoshkaruppusamy.site">
-            <label for="receivers">Recipient Emails (comma-separated):</label>
-            <input type="text" id="receivers" required placeholder="receiver1@example.com,receiver2@example.com">
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" required placeholder="Test Subject">
-            <label for="content">Content:</label>
-            <textarea id="content" required placeholder="Test Content"></textarea>
-            <button type="submit" id="sendNow">Send Email Now</button>
-        </form>
+        <div class="content">
+            <div id="alertBox" class="alert"></div>
+            
+            <form id="emailForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sender">
+                            <i class="fas fa-at"></i> Sender Email
+                        </label>
+                        <input 
+                            type="email" 
+                            id="sender" 
+                            required 
+                            placeholder="you@santhoshkaruppusamy.site"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="receivers">
+                            <i class="fas fa-users"></i> Recipient Emails
+                        </label>
+                        <input 
+                            type="text" 
+                            id="receivers" 
+                            required 
+                            placeholder="email1@example.com, email2@example.com"
+                        >
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="subject">
+                            <i class="fas fa-heading"></i> Subject Line
+                        </label>
+                        <input 
+                            type="text" 
+                            id="subject" 
+                            required 
+                            placeholder="Your email subject"
+                        >
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="content">
+                            <i class="fas fa-edit"></i> Email Content
+                        </label>
+                        <textarea 
+                            id="content" 
+                            required 
+                            placeholder="Write your email message here..."
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button type="submit" id="sendNow">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-
+    
     <script>
         const apiBaseUrl = 'https://sirvaz42x9.execute-api.ap-south-1.amazonaws.com/prod';
-
+        const alertBox = document.getElementById('alertBox');
+        
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+            alertBox.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+        
         document.getElementById('emailForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const sender = document.getElementById('sender').value.trim();
             const receivers = document.getElementById('receivers').value.split(',').map(email => email.trim());
             const subject = document.getElementById('subject').value.trim();
             const content = document.getElementById('content').value.trim();
-
-            const payload = {
-                sender: sender,
-                to: receivers,
-                subject: subject,
-                body: content
-            };
-
-            const response = await fetch(`${apiBaseUrl}/send-email`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-            alert(result.message || result.error);
+            
+            // Basic validation
+            if (!sender || !receivers.length || !subject || !content) {
+                showAlert('Please fill in all fields correctly', 'error');
+                return;
+            }
+            
+            const sendButton = document.getElementById('sendNow');
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            
+            try {
+                const payload = {
+                    sender: sender,
+                    to: receivers,
+                    subject: subject,
+                    body: content
+                };
+                
+                const response = await fetch(`${apiBaseUrl}/send-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert(result.message || 'Email sent successfully!', 'success');
+                    document.getElementById('emailForm').reset();
+                } else {
+                    showAlert(result.error || 'Failed to send email. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please check your connection and try again.', 'error');
+                console.error('Error:', error);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+            }
         });
     </script>
 </body>
